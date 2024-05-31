@@ -23,9 +23,11 @@ import com.example.quiz.repository.QuizDao;
 import com.example.quiz.service.ifs.QuizService;
 import com.example.quiz.vo.CreateOrUpdateReq;
 import com.example.quiz.vo.AnswerReq;
+import com.example.quiz.vo.AnswerRes;
 import com.example.quiz.vo.BaseRes;
 import com.example.quiz.vo.SearchRes;
 import com.example.quiz.vo.StatisticsRes;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class QuizServiceImpl implements QuizService {
@@ -51,7 +53,12 @@ public class QuizServiceImpl implements QuizService {
 			item.setPublished(req.isPublished());
 		}
 		// 存回 DB
-		quizDao.saveAll(req.getQuizList());
+		try {
+			quizDao.saveAll(req.getQuizList());
+		} catch (Exception e) {
+			return new BaseRes(RtnCode.SAVE_QUIZ_ERROR.getCode(), RtnCode.SAVE_QUIZ_ERROR.getMessage());
+		}
+		
 		return new BaseRes(RtnCode.SUCCESS.getCode(), RtnCode.SUCCESS.getMessage());
 	}
 
@@ -129,15 +136,27 @@ public class QuizServiceImpl implements QuizService {
 			return new BaseRes(RtnCode.QUIZ_NOT_FOUND.getCode(), RtnCode.QUIZ_NOT_FOUND.getMessage());
 		}
 		// 刪除整張問卷
-		quizDao.deleteByQuizId(req.getQuizList().get(0).getQuizId());
+		try {
+			quizDao.deleteByQuizId(req.getQuizList().get(0).getQuizId());
+		} catch (Exception e) {
+			return new BaseRes(RtnCode.DELETE_QUIZ_ERROR.getCode(), RtnCode.DELETE_QUIZ_ERROR.getMessage());
+		}
+		
 		// 根據是否要發布，再把 published 的值 set 到傳送過來的 quizList 中
 		for (Quiz item : req.getQuizList()) {
 			item.setPublished(req.isPublished());
 		}
 		// 存回 DB
-		quizDao.saveAll(req.getQuizList());
+		try {
+			quizDao.saveAll(req.getQuizList());
+		} catch (Exception e) {
+			return new BaseRes(RtnCode.SAVE_QUIZ_ERROR.getCode(), RtnCode.SAVE_QUIZ_ERROR.getMessage());
+		}
+		
 		return new BaseRes(RtnCode.SUCCESS.getCode(), RtnCode.SUCCESS.getMessage());
 	}
+	
+	
 
 	private BaseRes checkParams(CreateOrUpdateReq req) {
 		if (CollectionUtils.isEmpty(req.getQuizList())) {
@@ -244,7 +263,7 @@ public class QuizServiceImpl implements QuizService {
 		// 把非簡答題的每題答案各自串成字串，即一個選項(答案)會有一個字串
 		for (Answer item : answers) {
 			// 若是包含在qus此list中的就表示是選擇題(單、多選)
-			if (qus.contains(item.getQuizId())) {
+			if (qus.contains(item.getQuId())) {
 				// 若 key 已存在
 				if (quIdAnswerMap.containsKey(item.getQuId())) {
 					// 1. 透過 key 取得對應的 value
@@ -256,7 +275,8 @@ public class QuizServiceImpl implements QuizService {
 				} else { // key 不存在，直接新增 key 和 value
 					quIdAnswerMap.put(item.getQuId(), item.getAnswer());
 				}
-			}   
+			} 
+
 		}		
 		// 計算每題每個選項的次數
 		// Map 中的 Map<String, Integer> ，指的是 answerCountMap
@@ -267,6 +287,10 @@ public class QuizServiceImpl implements QuizService {
 			// answerCoontMap: 選項(答案)與次數的 mapping
 			Map<String, Integer> answerCountMap = new HashMap<>();
 			// 取得每個問題的選項
+			//非選擇題的 options 是 null : 要排除
+			if(quizs.get(item.getKey() - 1).getOptions() == null) {
+				continue;
+			}
 			String[] optionList = quizs.get(item.getKey() - 1).getOptions().split(";");
 			// 把問題的選項與次數做 mapping
 			for (String option : optionList) {
@@ -281,5 +305,33 @@ public class QuizServiceImpl implements QuizService {
 			quizIdAndAnsCountMap.put(item.getKey(), answerCountMap);
 		}
 		return new StatisticsRes(RtnCode.SUCCESS.getCode(), RtnCode.SUCCESS.getMessage(), quizIdAndAnsCountMap);
+	}
+
+	@Override
+	public BaseRes objMapper(String str) {
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			Quiz quiz = mapper.readValue(str, Quiz.class);
+		} catch (Exception e) {
+			// 1. 回傳固定錯誤訊息
+			// return new BaseRes(RtnCode.PARAM_ERROR.getCode(), RtnCode.PARAM_ERROR.getMessage());
+			// 2. 回傳 catch 中 exception 的錯誤訊息
+			return new BaseRes(RtnCode.ERROR_CODE, e.getMessage());
+		}
+		return new BaseRes(RtnCode.SUCCESS.getCode(), RtnCode.SUCCESS.getMessage());
+	}
+
+	@Override
+	public SearchRes findAllInfo(int quizId) {
+		
+		return new SearchRes(RtnCode.SUCCESS.getCode(), RtnCode.SUCCESS.getMessage(),
+				quizDao.findByQuizId(quizId));
+	}
+
+	@Override
+	public AnswerRes findAnswer(int quizId, int quId) {
+		
+		return new AnswerRes(RtnCode.SUCCESS.getCode(), RtnCode.SUCCESS.getMessage(),
+				answerDao.findByQuizIdAndQuId(quizId, quId));
 	}
 }

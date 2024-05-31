@@ -18,9 +18,10 @@ public interface QuizDao extends JpaRepository<Quiz, QuizId> {
 
 	public boolean existsByQuizId(int quizId);
 
+	
 	public List<Quiz> findByQuizNameContainingAndStartDateGreaterThanEqualAndEndDateLessThanEqual(String quizName,
 			LocalDate startDate, LocalDate endDate);
-
+	
 	public List<Quiz> findByQuizNameContainingAndStartDateGreaterThanEqualAndEndDateLessThanEqualAndPublishedTrue(//
 			String quizName, LocalDate startDate, LocalDate endDate);
 
@@ -42,4 +43,5 @@ public interface QuizDao extends JpaRepository<Quiz, QuizId> {
 	public List<Integer> findQuidsByQuizIdAndNecessaryTrue(int quizId);
 	
 	public List<Quiz> findByQuizId(int quizId);
+	
 }

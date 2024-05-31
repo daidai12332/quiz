@@ -28,18 +28,18 @@ public class QuizServiceTest {
 	@Autowired
 	private QuizDao quizDao;
 
-	@BeforeEach
-	private void addData() {
-		CreateOrUpdateReq req = new CreateOrUpdateReq();
-		req.setQuizList(new ArrayList<>(Arrays.asList(new Quiz(1, 1, "test", "test", LocalDate.now().plusDays(2),
-				LocalDate.now().plusDays(9), "q_test", "single", true, "A;B;C;D", false))));
-		quizService.create(req);
-	}
-	
-	@AfterEach
-	private void afterEach() {
-		quizDao.deleteById(new QuizId(1,1));
-	}
+//	@BeforeEach
+//	private void addData() {
+//		CreateOrUpdateReq req = new CreateOrUpdateReq();
+//		req.setQuizList(new ArrayList<>(Arrays.asList(new Quiz(1, 1, "test", "test", LocalDate.now().plusDays(2),
+//				LocalDate.now().plusDays(9), "q_test", "single", true, "A;B;C;D", false))));
+//		quizService.create(req);
+//	}
+//	
+//	@AfterEach
+//	private void afterEach() {
+//		quizDao.deleteById(new QuizId(1,1));
+//	}
 
 	@Test
 	public void createTest() {
@@ -112,6 +112,11 @@ public class QuizServiceTest {
 
 	@Test
 	public void updateTest() {
-
+		LocalDate now = LocalDate.now();
+		LocalDate te = LocalDate.of(now.getYear(), now.getMonthValue(), 1);
+		if(now.getMonthValue() == te.getMonthValue()) {
+			System.out.println("equal!");
+		}
+		
 	}
 }

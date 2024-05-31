@@ -12,5 +12,7 @@ public interface AnswerDao extends JpaRepository<Answer, Integer>{
 
 	public List<Answer> findByQuizIdOrderByQuId(int quizId);
 	
+	public List<Answer> findByQuizIdAndQuId(int quizId, int quId);
+	
 	public boolean existsByQuizIdAndEmail(int quizId, String email);
 }

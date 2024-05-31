@@ -3,19 +3,23 @@ package com.example.quiz.vo;
 import java.util.List;
 
 import com.example.quiz.entity.Answer;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class AnswerReq {
-
+public class AnswerRes extends BaseRes{
 	
 	private List<Answer> answerList;
-
-	public AnswerReq() {
+	
+	public AnswerRes() {
 		super();
+		
 	}
 
-	public AnswerReq(List<Answer> answerList) {
-		super();
+	public AnswerRes(int code, String message) {
+		super(code, message);
+		
+	}
+
+	public AnswerRes(int code, String message, List<Answer> answerList) {
+		super(code, message);
 		this.answerList = answerList;
 	}
 

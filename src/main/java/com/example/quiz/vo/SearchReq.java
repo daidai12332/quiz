@@ -2,6 +2,8 @@ package com.example.quiz.vo;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class SearchReq {
 
 	private String quizName;
@@ -10,6 +12,7 @@ public class SearchReq {
 
 	private LocalDate endDate;
 
+	@JsonProperty("backend")
 	boolean backend;
 
 	public SearchReq() {
